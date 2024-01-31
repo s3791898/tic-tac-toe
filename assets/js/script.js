@@ -1,52 +1,48 @@
 const Gameboard = (() => {
-  const board = [];
+  const gameboard = ["", "", "", "", "", "", "", "", ""];
 
-  const initialiseBoard = () => {
-    for (let i = 0; i < 9; i++) {
-      board.push(null); // Initialises each cell with null (empty)
-    }
-  };
-
-  const getBoard = () => board.slice();
-
-  const updateCell = (index, player) => {
-    if (index >= 0 && index < board.length && board[index] === null) {
-      board[index] = player; // Update the cell with the players symbol
-      return true; // Cell updated successfully
-    }
-    return false; // Cell update failed
+  const render = () => {
+    let boardHTML = "";
+    gameboard.forEach((square, index) => {
+      boardHTML += `<div class="square" id="square-${index}">${square}</div>`;
+    });
+    document.querySelector("#gameboard").innerHTML = boardHTML;
   };
 
   const resetBoard = () => {
-    board.fill(null);
+    gameboard.fill("");
+    render();
   };
 
-  initialiseBoard();
-
   return {
-    getBoard,
-    updateCell,
+    render,
     resetBoard,
   };
 })();
 
-const Player = (name, symbol) => ({
+const player = (name, symbol) => ({
   name,
   symbol,
 });
 
-const GameController = (() => {
+const Game = (() => {
+  let players = [];
   let currentPlayer;
-  let winner = null;
+  let gameOver;
 
-  const startGame = (player1, player2) => {
+  const startGame = () => {
+    players = [
+      player(document.querySelector("#player1").value, "X"),
+      player(document.querySelector("#player2").value, "O"),
+    ];
     // Randomly select the starting player
-    currentPlayer = Math.random() < 0.5 ? player1 : player2;
-    winner = null; // Reset the winner
+    currentPlayer = players[Math.floor(Math.random() * players.length)];
+    gameOver = false;
+    Gameboard.render();
   };
 
   const switchPlayer = () => {
-    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
   };
 
   const getCurrentPlayer = () => currentPlayer;
@@ -57,3 +53,8 @@ const GameController = (() => {
 
   return { startGame, switchPlayer, getCurrentPlayer };
 })();
+
+const startButton = document.querySelector("#start-button");
+startButton.addEventListener("click", () => {
+  Game.startGame();
+});

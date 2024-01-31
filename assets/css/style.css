@@ -1,0 +1,40 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#game-title {
+  font-size: 3rem;
+}
+
+#gameboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 50rem;
+  height: 50rem;
+  margin: 1rem;
+}
+
+.square {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  font-size: 5rem;
+}
+
+.square:hover {
+  background-color: #ACACAC;
+}
