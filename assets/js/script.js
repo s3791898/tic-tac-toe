@@ -9,25 +9,29 @@ const Gameboard = (() => {
       boardHTML += `<div class="square" id="square-${index}">${square}</div>`;
     });
     document.querySelector("#gameboard").innerHTML = boardHTML;
-
     // Add event listeners to each square
     document.querySelectorAll(".square").forEach((square, index) => {
       square.addEventListener("click", () => {
-        // Check if the clicked square is empty
-        if (gameboard[index] === "") {
-          // Update the gameboard array with the current player's symbol
-          gameboard[index] = Game.getCurrentPlayer().symbol;
-          render();
+        // Check if the game is over
+        if (!Game.isGameOver()) {
+          // Check if the clicked square is empty
+          if (gameboard[index] === "") {
+            // Update the gameboard array with the current player's symbol
+            gameboard[index] = Game.getCurrentPlayer().symbol;
+            render();
 
-          const winner = Game.checkWinner();
-          if (winner === true) {
-            resultDisplay.textContent = `${
-              Game.getCurrentPlayer().name
-            } is the Winner!`;
-          } else if (winner === "tie") {
-            resultDisplay.textContent = `This match was a Tie!`;
-          } else {
-            Game.switchPlayer();
+            const winner = Game.checkWinner();
+            if (winner === true) {
+              resultDisplay.textContent = `${
+                Game.getCurrentPlayer().name
+              } is the Winner!`;
+              Game.endGame();
+            } else if (winner === "tie") {
+              resultDisplay.textContent = "Tie!";
+              Game.endGame();
+            } else {
+              Game.switchPlayer();
+            }
           }
         }
       });
@@ -40,6 +44,8 @@ const Gameboard = (() => {
   };
 
   const getGameboard = () => gameboard;
+
+  render();
 
   return {
     render,
@@ -56,8 +62,33 @@ const player = (name, symbol) => ({
 const Game = (() => {
   let players = [];
   let currentPlayer;
-  let gameOver;
+  let gameOver = false;
   const resultDisplay = document.querySelector("#result-display");
+  const startButton = document.querySelector("#start-button");
+  const restartButton = document.querySelector("#restart-button");
+
+  startButton.addEventListener("click", () => {
+    gameOver = false;
+    Gameboard.resetBoard();
+    const player1Name = document.querySelector("#player1");
+    const player2Name = document.querySelector("#player2");
+    const displayMessage = document.querySelector("#message");
+
+    if (player1Name.value === "" || player2Name.value === "") {
+      displayMessage.textContent = "Please enter in the name of both players";
+    } else {
+      startGame();
+      displayMessage.textContent = `${player1Name.value} is (X) and ${player2Name.value} is (O)`;
+      player1Name.value = "";
+      player2Name.value = "";
+    }
+  });
+
+  restartButton.addEventListener("click", () => {
+    gameOver = false;
+    Gameboard.resetBoard();
+    switchPlayer();
+  });
 
   const startGame = () => {
     players = [
@@ -66,12 +97,13 @@ const Game = (() => {
     ];
     // Randomly select the starting player
     currentPlayer = players[Math.floor(Math.random() * players.length)];
+    resultDisplay.textContent = `${getCurrentPlayer().name}'s turn`;
     Gameboard.render();
   };
 
   const switchPlayer = () => {
     currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
-    resultDisplay.textContent = `${getCurrentPlayer().name} turn`;
+    resultDisplay.textContent = `${getCurrentPlayer().name}'s  turn`;
   };
 
   const getCurrentPlayer = () => currentPlayer;
@@ -108,31 +140,20 @@ const Game = (() => {
     return false;
   };
 
-  const endGame = () => {};
+  const endGame = () => {
+    gameOver = true;
+  };
 
-  return { startGame, switchPlayer, getCurrentPlayer, checkWinner };
+  const isGameOver = () => {
+    return gameOver;
+  };
+
+  return {
+    startGame,
+    switchPlayer,
+    getCurrentPlayer,
+    checkWinner,
+    endGame,
+    isGameOver,
+  };
 })();
-
-const startButton = document.querySelector("#start-button");
-startButton.addEventListener("click", () => {
-  const player1Name = document.querySelector("#player1");
-  const player2Name = document.querySelector("#player2");
-
-  if (player1Name.value === "" || player2Name.value === "") {
-    document.querySelector("#message").textContent =
-      "Please enter in the name of both players";
-  } else {
-    Game.startGame();
-    player1Name.value = "";
-    player2Name.value = "";
-  }
-});
-
-const restartButton = document.querySelector("#restart-button");
-restartButton.addEventListener("click", () => {
-  Gameboard.resetBoard();
-});
-
-// NOTE FOR NEXT STEP
-// figure out how to disable the gameboard when a winner is determined to prevent the user from playing.
-// Add further styles to the result-display, message, background and the overall visual of the game.
