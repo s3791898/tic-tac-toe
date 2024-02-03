@@ -38,3 +38,7 @@ body {
 .square:hover {
   background-color: #ACACAC;
 }
+
+#result-display {}
+
+#message {}
